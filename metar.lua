@@ -62,8 +62,15 @@ function get_metar()
     loading_timer = os.clock()
     
     -- Start async curl in background (returns immediately)
-    local cmd = string.format('curl -s "https://aviationweather.gov/api/data/metar?ids=%s&format=raw" > "%s" 2>&1 &', 
-                              icao, temp_file)
+    -- Windows requires 'start /B' instead of '&' for background execution
+    local cmd
+    if SYSTEM == "IBM" then  -- Windows
+        cmd = string.format('start /B curl -s "https://aviationweather.gov/api/data/metar?ids=%s&format=raw" > "%s" 2>&1', 
+                          icao, temp_file)
+    else  -- Linux/Mac
+        cmd = string.format('curl -s "https://aviationweather.gov/api/data/metar?ids=%s&format=raw" > "%s" 2>&1 &', 
+                          icao, temp_file)
+    end
     os.execute(cmd)
 end
 
